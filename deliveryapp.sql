@@ -8,10 +8,9 @@ CREATE TABLE users (
        password VARCHAR(255) NOT NULL,
        role ENUM('USER', 'OWNER') NOT NULL,
        nickname VARCHAR(100) NOT NULL,
-       wallet_id BIGINT UNIQUE, -- 사용자 지갑 ID
-       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-       deleted_at TIMESTAMP NULL
+       created_at DATETIME NOT NULL,
+       updated_at DATETIME NOT NULL,
+       deleted_at DATETIME DEFAULT NULL
 );
 
 -- wallets 테이블 (사용자 지갑)
@@ -19,9 +18,9 @@ CREATE TABLE wallets (
          id BIGINT AUTO_INCREMENT PRIMARY KEY,
          user_id BIGINT NOT NULL UNIQUE,  -- 한 유저당 하나의 지갑만 존재
          balance DECIMAL(10,2) NOT NULL DEFAULT 0.0,
-         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-         deleted_at TIMESTAMP NULL,
+         created_at DATETIME NOT NULL,
+         updated_at DATETIME NOT NULL,
+         deleted_at DATETIME DEFAULT NULL,
          FOREIGN KEY (user_id) REFERENCES users(id) 
 );
 
@@ -31,15 +30,15 @@ CREATE TABLE stores (
         user_id BIGINT NOT NULL,  -- 가게 소유자 ID
         name VARCHAR(255) NOT NULL,
         category VARCHAR(100) NOT NULL,
-        status ENUM('OPEN', 'CLOSED', 'DELETED') NOT NULL DEFAULT 'CLOSED',
-        open_time TIME NOT NULL,
-        close_time TIME NOT NULL,
-        min_order_amount DECIMAL(10,2) NOT NULL DEFAULT 0.0,
+        status ENUM('OPEN', 'PREPARING', 'DELETED') NOT NULL DEFAULT 'PREPARING',
+        opening_time TIME NOT NULL,
+        closing_time TIME NOT NULL,
+        min_order_price DECIMAL(10,2) NOT NULL DEFAULT 0.0,
         delivery_fee DECIMAL(10,2) NOT NULL DEFAULT 0.0,
-        average_rating DECIMAL(3,2) DEFAULT 0.0,  -- 소수점 2자리까지 허용
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        deleted_at TIMESTAMP NULL,
+        average_rating DOUBLE DEFAULT 0.0,  -- 소수점 2자리까지 허용
+        created_at DATETIME NOT NULL,
+        updated_at DATETIME NOT NULL,
+        deleted_at DATETIME DEFAULT NULL,
         FOREIGN KEY (user_id) REFERENCES users(id) 
 );
 
@@ -51,9 +50,9 @@ CREATE TABLE menus (
        price DECIMAL(10,2) NOT NULL,
        description TEXT NULL,
        status ENUM('AVAILABLE', 'SOLD_OUT', 'DELETED') NOT NULL DEFAULT 'AVAILABLE',
-       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-       deleted_at TIMESTAMP NULL,
+       created_at DATETIME NOT NULL,
+       updated_at DATETIME NOT NULL,
+       deleted_at DATETIME DEFAULT NULL,
        FOREIGN KEY (store_id) REFERENCES stores(id) 
 );
 
@@ -64,9 +63,9 @@ CREATE TABLE orders (
         store_id BIGINT NOT NULL,
         total_price DECIMAL(10,2) NOT NULL,
         status ENUM('REQUESTED', 'ACCEPTED', 'COOKING', 'DELIVERING', 'COMPLETED', 'CANCELED') NOT NULL DEFAULT 'REQUESTED',
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        deleted_at TIMESTAMP NULL,
+        created_at DATETIME NOT NULL,
+        updated_at DATETIME NOT NULL,
+        deleted_at DATETIME DEFAULT NULL,
         FOREIGN KEY (user_id) REFERENCES users(id) ,
         FOREIGN KEY (store_id) REFERENCES stores(id) 
 );
@@ -78,9 +77,9 @@ CREATE TABLE order_items (
          menu_id BIGINT NOT NULL,
          quantity INT NOT NULL CHECK (quantity > 0),
          price DECIMAL(10,2) NOT NULL,  -- 주문 당시 가격 저장
-         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-         deleted_at TIMESTAMP NULL,
+         created_at DATETIME NOT NULL,
+         updated_at DATETIME NOT NULL,
+         deleted_at DATETIME DEFAULT NULL,
          FOREIGN KEY (order_id) REFERENCES orders(id) ,
          FOREIGN KEY (menu_id) REFERENCES menus(id) 
 );
